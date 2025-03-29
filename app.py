@@ -42,11 +42,23 @@ def obter_enquetes_por_id(id): #esse método recebe por parametro o id da enquet
             return jsonify(enquente)
 
 # 4. Votar em uma opção de enquete - POST
+@app.route('/api/enquetes/{id}/votar',methods=['POST'])
+
 # 5. Resultados de uma enquete
+@app.route('/api/enquetes/{id}/resultados',methods=['GET'])
+
 # 6. Visualizar opções de uma enquete
+@app.route('/api/enquetes/{id}/opcoes',methods=['GET'])
+
 # 7. Adicionar a opção em uma enquete
+@app.route('/api/enquetes/{id}/opcoes',methods=['GET'])
+
 # 8. Deletar enquete
+@app.route('/api/enquetes/{id}',methods=['GET'])
+
 # 9. Deletar uma opção de uma enquete
+@app.route('/api/enquetes/{id_enquete}/opcoes/{id_opcao}',methods=['GET'])
+
 
 
 #@app.route('/api/enquetes/<int:id>/opcoes',methods=['GET'])
