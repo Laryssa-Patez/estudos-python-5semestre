@@ -44,10 +44,17 @@ class Voto(db.Model):
 
 
 #Comandos no banco
-    #data = request.get_json()
-    #nova_enquete = Enquete(titulo=data['titulo'], descricao=data['descricao'])
-    #db.session.add = (comando) # Realiza o registro no banco de dados
-    #db.session.commit() # Necessário para comenado de edição no banco de dados
+    # Obtém dados da requisição JSON
+        #variavel_obter_dados = request.get_json() 
+
+    # Cria novo registro
+    #nome_novo_registro = {Tabela}({coluna}=variavel_obter_dados['{parametro do json}'], {coluna}=variavel_obter_dados['{parametro do json}'])
+
+    # Realiza o registro no banco de dados
+        #db.session.add = (nome_novo_registro) 
+
+    # Necessário para quando tem edição no banco de dados (confirma a transação)
+        #db.session.commit() 
 
 # 1. Criar enquete - POST
 @app.route('/api/enquetes',methods=['POST'])
@@ -94,8 +101,8 @@ def obter_enquetes_por_id(id): #esse método recebe por parametro o id da enquet
     return jsonify({"erro": "Enquete não encontrada."}), 404  # Retorna erro se a enquete não for encontrada
 
 # 4. Votar em uma opção de enquete - POST
-@app.route('/api/enquetes/<int:id>/votar',methods=['POST'])
-def votar_enquete(opcao_id):
+@app.route('/api/enquetes/<int:enquete_id>/votar',methods=['POST'])
+def votar_enquete(enquete_id):
 
     #obtem os dados da requsição
     data = request.get_json()
@@ -106,13 +113,13 @@ def votar_enquete(opcao_id):
 
     opcao_id = data['opcao_id']
 
-    # Verifica se a opção existe
-    opcao = Opcao.query.get(opcao_id)
-    if not opcao:
+    # Verifica se a opção existe dentro da enquete
+    opcoes = Opcao.query.filter_by(opcao_id=opcao_id, enquete_id=enquete_id).first()
+    if not opcoes:
         return jsonify({"error": "Opção de voto não encontrada"}), 404
 
     # Cria o novo voto
-    novo_voto = Voto(enquete_id=id, opcao_id=opcao_id)
+    novo_voto = Voto(enquete_id=enquete_id, opcao_id=opcao_id)
     db.session.add(novo_voto)  # Adiciona o voto na sessão e comita
     db.session.commit()
     
@@ -123,7 +130,29 @@ def votar_enquete(opcao_id):
 #@app.route('/api/enquetes/<int:id>/resultados',methods=['GET'])
 
 # 6. Visualizar opções de uma enquete
-#@app.route('/api/enquetes/<int:id>/opcoes',methods=['GET'])
+@app.route('/api/enquetes/<int:id>/opcoes',methods=['GET'])
+def obter_opcoes(id):
+    enquetes = Enquete.query.get(id)
+    if enquetes: # Se a enquete for encontrada
+        opcoes_data = [] # Cria lista opcao_data (vamos usar para armazenar os dados das opções)
+        for opcao in enquetes.opcoes: # "enquetes" representa uma instancia da tabela enquete e com ".opcoes" acessamos as opcoes que estão relacionadas com a enquete
+            opcao_data = {
+                "id": opcao.opcao_id, # {nome do laço}.{nome da coluna da tabela}
+                "titulo": opcao.titulo, # {nome do laço}.{nome da coluna da tabela}
+                "enquete_id": opcao.enquete_id # {nome do laço}.{nome da coluna da tabela}
+            } 
+            opcoes_data.append(opcao_data)  # Adiciona a opção à lista
+
+        enquete_data = {
+            "id": enquetes.id,
+            "titulo": enquetes.titulo,
+            "descricao": enquetes.descricao,
+            "opcoes": opcoes_data #inclui as opcoes da enquete, armazenadas na lista "opcao_data"
+        }
+        return jsonify(enquete_data), 200  # Retorna os dados da enquete encontrada
+    
+    return jsonify({"erro": "Enquete não encontrada."}), 404  # Retorna erro se a enquete não for encontrada
+
 
 # 7. Adicionar a opção em uma enquete
 @app.route('/api/enquetes/<int:id>/opcoes',methods=['POST'])
@@ -134,7 +163,7 @@ def criar_opcoes(id):
     if 'titulo' not in data:
         return jsonify({"erro": "A descrição é obrigatória."}), 400
 
-    nova_opcao = Opcao(titulo=data['titulo'], enquete_id=id)
+    nova_opcao = Opcao(titulo=data['titulo'], enquete_id=id) # Registra na coluna titulo o titulo que estamos enviando e registra na coluna enquete_id o id passado na rota
     db.session.add(nova_opcao)
     db.session.commit()
     
@@ -154,15 +183,24 @@ def deletar_enquete_por_id(id): #esse método recebe por parametro o id da enque
         return jsonify({"Mensagem": "Enquete não encontrada"}), 404
 
 # 9. Deletar uma opção de uma enquete
-#@app.route('/api/enquetes/<int:id>/opcoes/{id_opcao}',methods=['DELETE'])
+@app.route('/api/enquetes/<int:enquete_id>/opcoes/<int:opcao_id>',methods=['DELETE'])
+def deletar_opcao_por_id(enquete_id, opcao_id): #esse método recebe por parametro o id da enquete
+    enquetes = Enquete.query.get(enquete_id) #{nome metodo} = {nome tabela}.query.get.({id recebido no parametro})
 
-#@app.route('/api/enquetes/<int:id>/opcoes',methods=['GET'])
-#def opcoes_enquete(id): #esse método recebe por parametro o id da enquete
-#    nova_opcao = request.get_json()
-#    for indice,livro in enumerate(enquetes):
-#        if enquente.get('id') == id:
-#            enquetes.update(nova_opcao)
-#            return jsonify(livros[indice])
+    # Verifica se a enquete existe
+    if not enquetes:
+        return jsonify({"mensagem": "Enquete não encontrada."}), 404
+
+    # Busca a opção pela opcao_id dentro da enquete
+    opcoes = Opcao.query.filter_by(opcao_id=opcao_id, enquete_id=enquete_id).first()  
+
+    # Verifica se a opção existe dentro da enquete
+    if opcoes:
+        db.session.delete(opcoes)  # Deleta a opção
+        db.session.commit()  # Comita
+        return jsonify({"mensagem": "Opção excluída com sucesso."}), 200
+    else:
+        return jsonify({"mensagem": "Opção não encontrada."}), 404
 
 if __name__ == '__main__':
     # Cria as tabelas do modelo
