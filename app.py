@@ -9,64 +9,60 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
 db = SQLAlchemy(app)
 
 # Definindo/criando as tabelas no banco de dados
-class Tasks(db.Model):
+class Enquete(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     titulo = db.Column(db.String(40), nullable=False)
     descricao = db.Column(db.String(130), nullable=False)
 
-#Executa comandos da conexao com o BD
-
-
-#Encerra conexão como banco de dados
-#cursor.close()
-#conexao.close()
-
-#Comando sempre em aspas simples e se precisar passar um texto usar aspas duplas
-##comando = '' #Escreve aqui o comando em sql
-##cursor.Execute(comando) #executa o comando
-##conexao.commit() # Necessário para comenado de edição no banco de dados
-##ou
-##resultado = cursor.fechtall() # Necessário para comandos de leituras no banco de dados
-
+#Comandos no banco
+    #data = request.get_json()
+    #nova_enquete = Enquete(titulo=data['titulo'], descricao=data['descricao'])
+    #db.session.add = (comando) # Realiza o registro no banco de dados
+    #db.session.commit() # Necessário para comenado de edição no banco de dados
 
 
 # Cria array de enquetes
-enquetes = [
-    {
-        'id': 1,
-        'titulo': 'Qual evento você gostaria que acontecesse na cidade?',
-        'descricao': 'Vote no evento que você gostaria de ver na cidade',
-        'opcoes': [
-            {'id': 1, 'descricao': 'Show de música ao vivo', 'votos': 0},
-            {'id': 2, 'descricao': 'Feira de artesanato', 'votos': 0},
-            {'id': 3, 'descricao': 'Campeonato de esportes', 'votos': 0}
-        ]
-    },
-    {
-        'id': 2,
-        'titulo': 'Qual sua opinião sobre o novo projeto de parque?',
-        'descricao': 'Vote sobre o projeto do novo parque na cidade',
-        'opcoes': [
-            {'id': 1, 'descricao': 'Apoio ao projeto', 'votos': 0},
-            {'id': 2, 'descricao': 'Contra o projeto', 'votos': 0}
-        ]
-    }
-]
+#enquetes = [
+    #{
+        #'id': 1,
+        #'titulo': 'Qual evento você gostaria que acontecesse na cidade?',
+        #'descricao': 'Vote no evento que você gostaria de ver na cidade',
+        #'opcoes': [
+            #{'id': 1, 'descricao': 'Show de música ao vivo', 'votos': 0},
+            #{'id': 2, 'descricao': 'Feira de artesanato', 'votos': 0},
+            #{'id': 3, 'descricao': 'Campeonato de esportes', 'votos': 0}
+        #]
+    #},
+#]
 
 # 1. Criar enquete - POST
 @app.route('/api/enquetes',methods=['POST'])
 def criar_enquetes():
     data = request.get_json() # Pega os dados enviados na requisição no formato JSON e os converte em um dicionário
-    nova_enquete = enquete(titulo=data['titulo'], descricao=data['email'])
-    db.session.add(nova_enquete)
-    
 
-    return jsonify(enquetes)
+    # Verifica se os campos 'titulo' e 'descricao' estão presentes no JSON
+    if 'titulo' not in data or 'descricao' not in data:
+        return jsonify({"erro": "Campos 'titulo' e 'descricao' são obrigatórios."}), 400
+
+    nova_enquete = Enquete(titulo=data['titulo'], descricao=data['descricao'])
+    db.session.add(nova_enquete)
+    db.session.commit()
+    
+    return jsonify({"mensagem": "Enquete criada com sucesso."}), 201
 
 # 2. Listar Enquetes - GET
 @app.route('/api/enquetes',methods=['GET'])
 def obter_enquetes():
-    return jsonify(enquetes)
+    enquetes = Enquete.query.all()
+    enquete_lista = []
+    for enquete in enquetes:
+        enquete_data = {
+            "id": enquete.id,
+            "titulo": enquete.titulo,
+            "descricao": enquete.descricao
+        }
+        enquete_lista.append(enquete_data)
+    return jsonify(enquete_lista), 200
 
 # 3. Obter detalhes de uma enquete - GET
 @app.route('/api/enquetes/<int:id>',methods=['GET'])
@@ -90,12 +86,15 @@ def obter_enquetes_por_id(id): #esse método recebe por parametro o id da enquet
 # 8. Deletar enquete
 @app.route('/api/enquetes/<int:id>', methods=['DELETE'])
 def deletar_enquete_por_id(id): #esse método recebe por parametro o id da enquete
-    for indice, enquete in enumerate(enquetes): 
-        if enquete['id'] == id: #Acessa os IDs na lista e valida se é igual ao id passado
-            del enquetes[indice]
-            break  # Após deletar, interrompe o loop (não precisa continuar procurando)
+    enquete = Enquete.query.get(id) #{nome metodo} = {nome tabela}.query.get.({id recebido no parametro})
 
-    return jsonify(enquetes)
+    #Valida se id existe e realiza a exclusão
+    if enquete:
+        db.session.delete(enquete)
+        db.session.commit()
+        return jsonify({"mensagem": "Enquete excluída com sucesso."}), 200
+    else:
+        return jsonify({"Mensagem": "Enquete não encontrada"}), 404
 
 # 9. Deletar uma opção de uma enquete
 #@app.route('/api/enquetes/<int:id>/opcoes/{id_opcao}',methods=['DELETE'])
