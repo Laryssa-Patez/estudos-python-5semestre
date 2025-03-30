@@ -107,7 +107,7 @@ def votar_enquete(opcao_id):
     opcao_id = data['opcao_id']
 
     # Verifica se a opção existe
-    opcao = Opcoes.query.get(opcao_id)
+    opcao = Opcao.query.get(opcao_id)
     if not opcao:
         return jsonify({"error": "Opção de voto não encontrada"}), 404
 
@@ -126,7 +126,19 @@ def votar_enquete(opcao_id):
 #@app.route('/api/enquetes/<int:id>/opcoes',methods=['GET'])
 
 # 7. Adicionar a opção em uma enquete
-#@app.route('/api/enquetes/<int:id>/opcoes',methods=['POST'])
+@app.route('/api/enquetes/<int:id>/opcoes',methods=['POST'])
+def criar_opcoes(id):
+    data = request.get_json() # Pega os dados enviados na requisição no formato JSON e os converte em um dicionário
+
+    # Verifica se os campos 'titulo' e 'descricao' estão presentes no JSON
+    if 'titulo' not in data:
+        return jsonify({"erro": "A descrição é obrigatória."}), 400
+
+    nova_opcao = Opcao(titulo=data['titulo'], enquete_id=id)
+    db.session.add(nova_opcao)
+    db.session.commit()
+    
+    return jsonify({"mensagem": "Opção criada com sucesso."}), 201
 
 # 8. Deletar enquete
 @app.route('/api/enquetes/<int:id>', methods=['DELETE'])
