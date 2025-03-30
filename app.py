@@ -1,10 +1,36 @@
 from flask import Flask, jsonify, request
+from flask_sqlalchemy import SQLAlchemy
 
 # Cria uma aplicação flask com o nome do arquivo atual
 app = Flask(__name__)
 
-# Cria array de enquetes
+# Instanciando o banco de dados
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
+db = SQLAlchemy(app)
 
+# Definindo/criando as tabelas no banco de dados
+class Tasks(db.Model):
+    id = db.Column(db.Integer, primary_key = True)
+    titulo = db.Column(db.String(40), nullable=False)
+    descricao = db.Column(db.String(130), nullable=False)
+
+#Executa comandos da conexao com o BD
+
+
+#Encerra conexão como banco de dados
+#cursor.close()
+#conexao.close()
+
+#Comando sempre em aspas simples e se precisar passar um texto usar aspas duplas
+##comando = '' #Escreve aqui o comando em sql
+##cursor.Execute(comando) #executa o comando
+##conexao.commit() # Necessário para comenado de edição no banco de dados
+##ou
+##resultado = cursor.fechtall() # Necessário para comandos de leituras no banco de dados
+
+
+
+# Cria array de enquetes
 enquetes = [
     {
         'id': 1,
@@ -30,8 +56,10 @@ enquetes = [
 # 1. Criar enquete - POST
 @app.route('/api/enquetes',methods=['POST'])
 def criar_enquetes():
-    nova_enquete = request.get_json()
-    enquetes.append(nova_enquete)
+    data = request.get_json() # Pega os dados enviados na requisição no formato JSON e os converte em um dicionário
+    nova_enquete = enquete(titulo=data['titulo'], descricao=data['email'])
+    db.session.add(nova_enquete)
+    
 
     return jsonify(enquetes)
 
@@ -82,5 +110,10 @@ def deletar_enquete_por_id(id): #esse método recebe por parametro o id da enque
 #            enquetes.update(nova_opcao)
 #            return jsonify(livros[indice])
 
-#Subir aplicação na porta 5000
-app.run(port=5000,host='localhost',debug=True)
+if __name__ == '__main__':
+    # Cria as tabelas do modelo
+    with app.app_context():
+        db.create_all()
+
+    #Sube aplicação na porta 5000
+    app.run(port=5000,host='localhost',debug=True)
