@@ -28,6 +28,12 @@ enquetes = [
 ]
 
 # 1. Criar enquete - POST
+@app.route('/api/enquetes',methods=['POST'])
+def criar_enquetes():
+    nova_enquete = request.get_json()
+    enquetes.append(nova_enquete)
+
+    return jsonify(enquetes)
 
 # 2. Listar Enquetes - GET
 @app.route('/api/enquetes',methods=['GET'])
@@ -42,22 +48,29 @@ def obter_enquetes_por_id(id): #esse método recebe por parametro o id da enquet
             return jsonify(enquente)
 
 # 4. Votar em uma opção de enquete - POST
-@app.route('/api/enquetes/{id}/votar',methods=['POST'])
+#@app.route('/api/enquetes/<int:id>/votar',methods=['POST'])
 
 # 5. Resultados de uma enquete
-@app.route('/api/enquetes/{id}/resultados',methods=['GET'])
+#@app.route('/api/enquetes/<int:id>/resultados',methods=['GET'])
 
 # 6. Visualizar opções de uma enquete
-@app.route('/api/enquetes/{id}/opcoes',methods=['GET'])
+#@app.route('/api/enquetes/<int:id>/opcoes',methods=['GET'])
 
 # 7. Adicionar a opção em uma enquete
-@app.route('/api/enquetes/{id}/opcoes',methods=['GET'])
+#@app.route('/api/enquetes/<int:id>/opcoes',methods=['POST'])
 
 # 8. Deletar enquete
-@app.route('/api/enquetes/{id}',methods=['GET'])
+@app.route('/api/enquetes/<int:id>', methods=['DELETE'])
+def deletar_enquete_por_id(id): #esse método recebe por parametro o id da enquete
+    for indice, enquete in enumerate(enquetes): 
+        if enquete['id'] == id: #Acessa os IDs na lista e valida se é igual ao id passado
+            del enquetes[indice]
+            break  # Após deletar, interrompe o loop (não precisa continuar procurando)
+
+    return jsonify(enquetes)
 
 # 9. Deletar uma opção de uma enquete
-@app.route('/api/enquetes/{id_enquete}/opcoes/{id_opcao}',methods=['GET'])
+#@app.route('/api/enquetes/<int:id>/opcoes/{id_opcao}',methods=['DELETE'])
 
 
 
