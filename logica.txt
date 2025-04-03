@@ -1,0 +1,97 @@
+# -*- coding: utf-8 -*-
+"""
+Operações básicas de lógica em Python
+"""
+
+# 1. Módulo de um número (Resto da divisão)
+a = 10
+b = 3
+resultado = a % b  # Obtém o resto da divisão de 10 por 3
+print(f"O resto da divisão de {a} por {b} é {resultado}")
+
+# 2. Verificar se um número é divisível por outro
+numero = 15
+divisor = 5
+if numero % divisor == 0:
+    print(f"{numero} é divisível por {divisor}")
+else:
+    print(f"{numero} não é divisível por {divisor}")
+
+# 3. Verificar se um número é par ou ímpar
+numero = 8
+if numero % 2 == 0:
+    print(f"{numero} é um número PAR")
+else:
+    print(f"{numero} é um número ÍMPAR")
+
+# 4. Comparação entre dois números
+a = 10
+b = 20
+print(f"{a} é igual a {b}? {a == b}")
+print(f"{a} é diferente de {b}? {a != b}")
+print(f"{a} é menor que {b}? {a < b}")
+print(f"{a} é maior que {b}? {a > b}")
+print(f"{a} é menor ou igual a {b}? {a <= b}")
+print(f"{a} é maior ou igual a {b}? {a >= b}")
+
+# 5. Uso de AND, OR e NOT para lógica booleana
+x = 5
+y = 10
+print(f"x é maior que 0 E y é maior que 0? {x > 0 and y > 0}")
+print(f"x é maior que 0 OU y é menor que 0? {x > 0 or y < 0}")
+print(f"Não é verdade que x seja maior que 10? {not (x > 10)}")
+
+# 6. Encontrar o maior de três números
+num1 = 12
+num2 = 7
+num3 = 20
+maior = max(num1, num2, num3)
+print(f"O maior número entre {num1}, {num2} e {num3} é {maior}")
+
+# 7. Verificar se um número está dentro de um intervalo
+numero = 25
+limite_inferior = 10
+limite_superior = 30
+if limite_inferior <= numero <= limite_superior:
+    print(f"{numero} está dentro do intervalo [{limite_inferior}, {limite_superior}]")
+else:
+    print(f"{numero} está fora do intervalo [{limite_inferior}, {limite_superior}]")
+
+# 8. Contagem de números pares em uma lista
+numeros = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+pares = [n for n in numeros if n % 2 == 0]  # Filtra apenas os números pares
+print(f"Números pares na lista: {pares}")
+
+# 9. Número positivo, negativo ou zero
+numero = -7
+if numero > 0:
+    print(f"{numero} é positivo")
+elif numero < 0:
+    print(f"{numero} é negativo")
+else:
+    print(f"{numero} é zero")
+
+# 10. Determinar se um ano é bissexto
+ano = 2024
+if (ano % 4 == 0 and ano % 100 != 0) or (ano % 400 == 0):
+    print(f"{ano} é um ano bissexto")
+else:
+    print(f"{ano} não é um ano bissexto")
+
+# 11. Contagem regressiva usando loop
+print("Contagem regressiva:")
+for i in range(5, 0, -1):
+    print(i)
+print("Fim!")
+
+# 12. Verificar se um número é primo
+num = 29
+if num > 1:
+    for i in range(2, int(num ** 0.5) + 1):
+        if num % i == 0:
+            print(f"{num} não é primo")
+            break
+    else:
+        print(f"{num} é primo")
+else:
+    print(f"{num} não é primo")
