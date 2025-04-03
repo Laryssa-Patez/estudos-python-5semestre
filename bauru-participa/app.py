@@ -127,7 +127,32 @@ def votar_enquete(enquete_id):
     return jsonify({"mensagem": "Voto registrado com sucesso!"}), 201
 
 # 5. Resultados de uma enquete
-#@app.route('/api/enquetes/<int:id>/resultados',methods=['GET'])
+@app.route('/api/enquetes/<int:id>/resultados',methods=['GET'])
+def obter_resultados(id):
+    enquete = Enquete.query.get(id)
+
+    # Verifica se a enquete existe
+    if not enquete:
+        return jsonify({"erro": "Enquete não encontrada."}), 404
+
+    # Contabiliza os votos para cada opção da enquete
+    resultados = [] # Cria o array pra contagem
+    for opcao in enquete.opcoes: # acessa todas as opções relacionadas à enquete (devido ao relacionamento definido no modelo Enquete.query.get(id)).
+        contagem_votos = Voto.query.filter_by(opcao_id=opcao.opcao_id).count() # Realiza count na tabela
+        resultados.append({ # O append() em Python é um método usado para adicionar um novo elemento ao final de uma lista.
+            "opcao_id": opcao.opcao_id,
+            "titulo": opcao.titulo,
+            "votos": contagem_votos
+        })
+
+    resposta = {
+        "id": enquete.id,
+        "titulo": enquete.titulo,
+        "descricao": enquete.descricao,
+        "resultados": resultados
+    }
+
+    return jsonify(resposta), 200
 
 # 6. Visualizar opções de uma enquete
 @app.route('/api/enquetes/<int:id>/opcoes',methods=['GET'])
